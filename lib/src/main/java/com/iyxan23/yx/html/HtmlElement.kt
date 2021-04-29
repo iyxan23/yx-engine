@@ -1,3 +1,7 @@
 package com.iyxan23.yx.html
 
-class HtmlElement 
+data class HtmlElement(
+    var tag: String,
+    var attributes: List<HtmlAttribute>,
+    var childs: List<HtmlElement>
+)
