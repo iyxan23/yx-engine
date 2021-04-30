@@ -1,3 +1,6 @@
 package com.iyxan23.yx.html
 
-class HtmlAttribute 
+data class HtmlAttribute(
+    var name: String,
+    var value: String
+)
