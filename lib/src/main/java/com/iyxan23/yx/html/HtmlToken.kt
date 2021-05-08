@@ -1,6 +1,6 @@
 package com.iyxan23.yx.html
 
-enum class HtmlTokens {
+enum class HtmlToken {
     OPEN_TAG,         // <
     TAG_NAME,         // <{tag name}
     ATTRIBUTE_NAME,   //  {tag name} {attribute name}=
