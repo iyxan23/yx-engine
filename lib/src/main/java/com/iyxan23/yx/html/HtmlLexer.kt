@@ -71,6 +71,8 @@ object HtmlLexer {
                 }
 
                 '>' -> {
+                    tokens.add(HtmlToken.CLOSE_TAG)
+
                     insideTag = false
                     insideInnerTag = true
                     readingInnerTag = true
