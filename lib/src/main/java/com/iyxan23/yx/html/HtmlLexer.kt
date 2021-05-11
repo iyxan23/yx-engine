@@ -27,7 +27,7 @@ object HtmlLexer {
                 readingInnerTag and (ch == '<') and (charBefore != '\\') -> {
                     // End of reading inner tag
                     tokens.add(HtmlToken.TEXT_VALUE)
-                    tokens.add(builder.toString())
+                    tokens.add(builder.toString().trim())
 
                     builder.clear()
                 }
@@ -37,7 +37,7 @@ object HtmlLexer {
                 readingTagName and (ch == '=') and (charBefore != '\\') -> {
                     // End of reading tag name
                     tokens.add(HtmlToken.TAG_NAME)
-                    tokens.add(builder.toString())
+                    tokens.add(builder.toString().trim())
 
                     builder.clear()
                 }
@@ -47,7 +47,7 @@ object HtmlLexer {
                 readingAttributeName and (ch == '<') and (charBefore != '\\') -> {
                     // End of reading attribute name
                     tokens.add(HtmlToken.ATTRIBUTE_NAME)
-                    tokens.add(builder.toString())
+                    tokens.add(builder.toString().trim())
 
                     builder.clear()
 
