@@ -10,10 +10,11 @@ object HtmlLexer {
 
         val tokens: ArrayList<Any> = ArrayList()
 
-        var builder: StringBuilder? = null
+        val builder: StringBuilder = StringBuilder()
 
         var readingTagName = false
         var readingAttributeName = false
+        var readingInnerTag = false
         var insideTag = false       // <..>
         var insideInnerTag = false  // < >..</ >
         var afterTagName = false
@@ -23,10 +24,22 @@ object HtmlLexer {
         data.forEach { ch ->
             // String reading
             when {
+                readingInnerTag and (ch == '<') and (charBefore != '\\') -> {
+                    // End of reading inner tag
+                    tokens.add(HtmlToken.TEXT_VALUE)
+                    tokens.add(builder.toString())
+
+                    builder.clear()
+                }
+
+                ////////////////////////////////////////////////////////////////////////////////////
+
                 readingTagName and (ch == '=') and (charBefore != '\\') -> {
                     // End of reading tag name
                     tokens.add(HtmlToken.TAG_NAME)
                     tokens.add(builder.toString())
+
+                    builder.clear()
                 }
 
                 ////////////////////////////////////////////////////////////////////////////////////
@@ -36,12 +49,15 @@ object HtmlLexer {
                     tokens.add(HtmlToken.ATTRIBUTE_NAME)
                     tokens.add(builder.toString())
 
+                    builder.clear()
+
                     readingTagName = false
                     afterTagName = true
                 }
 
-                readingAttributeName or readingTagName and ch.isLetter() -> {
-                    builder!!.append(ch)
+                readingAttributeName or readingTagName or readingInnerTag
+                        and ch.isLetter() -> {
+                    builder.append(ch)
                 }
             }
 
@@ -57,6 +73,7 @@ object HtmlLexer {
                 '>' -> {
                     insideTag = false
                     insideInnerTag = true
+                    readingInnerTag = true
                 }
 
                 '/' -> {
@@ -74,12 +91,10 @@ object HtmlLexer {
                     if (ch.isLetter()) {
                         if (insideTag and !afterTagName) {
                             // <..
-                            builder = StringBuilder()
                             readingTagName = true
 
                         } else if (insideTag and afterTagName) {
                             // <TagName ..
-                            builder = StringBuilder()
                             readingAttributeName = true
                         }
                     }
