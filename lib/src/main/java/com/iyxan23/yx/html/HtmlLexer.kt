@@ -14,6 +14,7 @@ object HtmlLexer {
 
         var readingTagName = false
         var readingAttributeName = false
+        var readingAttributeValue = false
         var readingInnerTag = false
         var insideTag = false       // <..>
         var insideInnerTag = false  // < >..</ >
@@ -24,6 +25,18 @@ object HtmlLexer {
         data.forEach { ch ->
             // String reading
             when {
+                // TODO: 5/11/21 Detect ""
+
+                readingAttributeValue and (ch == ' ') and (charBefore != '\\') -> {
+                    // End of reading attribute value
+                    tokens.add(HtmlToken.ATTRIBUTE_VALUE)
+                    tokens.add(builder.toString().trim())
+
+                    builder.clear()
+                }
+
+                ////////////////////////////////////////////////////////////////////////////////////
+
                 readingInnerTag and (ch == '<') and (charBefore != '\\') -> {
                     // End of reading inner tag
                     tokens.add(HtmlToken.TEXT_VALUE)
@@ -53,9 +66,10 @@ object HtmlLexer {
 
                     readingTagName = false
                     afterTagName = true
+                    readingAttributeValue = true
                 }
 
-                readingAttributeName or readingTagName or readingInnerTag
+                readingAttributeName or readingTagName or readingInnerTag or readingAttributeValue
                         and ch.isLetter() -> {
                     builder.append(ch)
                 }
