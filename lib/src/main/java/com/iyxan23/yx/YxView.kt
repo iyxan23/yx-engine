@@ -5,6 +5,10 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import com.iyxan23.yx.html.HtmlParser
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -38,28 +42,32 @@ class YxView : View {
         }
     }
 
-    fun loadUrl(url: String) {
+    suspend fun loadUrl(url: String) {
         Log.d(TAG, "loadUrl: Loading url $url")
 
-        val urlConnection: HttpURLConnection = URL(url).openConnection() as HttpURLConnection
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val urlConnection: HttpURLConnection = URL(url).openConnection() as HttpURLConnection
 
-        try {
-            val webPageStream: InputStream = BufferedInputStream(urlConnection.inputStream)
+                try {
+                    val webPageStream: InputStream = BufferedInputStream(urlConnection.inputStream)
 
-            val resultStream = ByteArrayOutputStream()
-            val buffer = ByteArray(1024)
-            var length: Int
+                    val resultStream = ByteArrayOutputStream()
+                    val buffer = ByteArray(1024)
+                    var length: Int
 
-            while (webPageStream.read(buffer).also { length = it } != -1) {
-                resultStream.write(buffer, 0, length)
+                    while (webPageStream.read(buffer).also { length = it } != -1) {
+                        resultStream.write(buffer, 0, length)
+                    }
+
+                    val result: String = resultStream.toString("UTF-8")
+
+                    parse(result)
+
+                } finally {
+                    urlConnection.disconnect()
+                }
             }
-
-            val result: String = resultStream.toString("UTF-8")
-
-            parse(result)
-
-        } finally {
-            urlConnection.disconnect()
         }
     }
 
