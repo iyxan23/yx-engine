@@ -88,13 +88,23 @@ object HtmlLexer {
                 }
 
                 else -> {
-                    if (ch.isLetter()) {
+                    if (ch.isLetter()
+
+                        and !readingTagName
+                        and !readingAttributeName
+                        and !readingInnerTag
+                        and !readingAttributeValue
+                    ) {
                         if (insideTag and !afterTagName) {
                             // <..
+                            builder.append(ch)
+
                             readingTagName = true
 
                         } else if (insideTag and afterTagName) {
                             // <TagName ..
+                            builder.append(ch)
+
                             readingAttributeName = true
                         }
                     }
