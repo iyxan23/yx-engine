@@ -1,12 +1,13 @@
 package com.iyxan23.yx.html
 
-enum class HtmlToken {
-    OPEN_TAG,         // <
-    TAG_NAME,         // <{tag name}
-    ATTRIBUTE_NAME,   //  {tag name} {attribute name}=
-    ATTRIBUTE_VALUE,  //             {attribute name}={attribute_value}
-    CLOSE_TAG,        //                                               >
-    TEXT_VALUE,       //                                               >{text value}
-    NO_CHILD_CLOSE,   //                                               />
-    OPEN_CLOSING_TAG, // </
+/**
+ * Enum class containing pretty much all the necessary "tokens" of HTML
+ */
+sealed class HtmlToken {
+    object TagOpen : HtmlToken()                    // <
+    object TagInsideClose : HtmlToken()             // >
+    object TagClose : HtmlToken()                   // </
+    object TagCloseEarly : HtmlToken()              // />
+    object Equal : HtmlToken()                      // =
+    data class Word(val word: String) : HtmlToken() // text that ends in space
 }

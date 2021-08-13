@@ -1,135 +1,71 @@
 package com.iyxan23.yx.html
 
-object HtmlLexer {
+/**
+ * This lexer turns a html text into a list of tokens that will later be parsed by the parser
+ */
+class HtmlLexer(
+    private val text: String
+) {
+    private var index = -1
+    private var currentChar: Char? = null
+    private val indexInBound get() = index > 0 && index < text.length
 
-    /**
-     * This function will analyse the syntax and will output a list of
-     * token and strings that later be parsed, displayed, and do all of that fun stuff
-     */
-    fun doLexicalAnalysis(data: String): List<Any> {
+    private val nextChar get() = advance()
 
-        val tokens: ArrayList<Any> = ArrayList()
+    private fun advance(): Char? {
+        index++
+        currentChar = if (indexInBound) text[index] else null
+        return currentChar
+    }
 
-        val builder: StringBuilder = StringBuilder()
+    private fun goBack(): Char? {
+        index--
+        currentChar = if (indexInBound) text[index] else null
+        return currentChar
+    }
 
-        var readingTagName = false
-        var readingAttributeName = false
-        var readingAttributeValue = false
-        var readingInnerTag = false
-        var insideTag = false       // <..>
-        var insideInnerTag = false  // < >..</ >
-        var afterTagName = false
+    fun doLexicalAnalysis(): List<HtmlToken> =
+        ArrayList<HtmlToken>().apply {
+            var token: HtmlToken? = nextToken()
 
-        var charBefore: Char = ' '
-
-        data.forEach { ch ->
-            // String reading
-            when {
-                // TODO: 5/11/21 Detect ""
-
-                readingAttributeValue and (ch == ' ') and (charBefore != '\\') -> {
-                    // End of reading attribute value
-                    tokens.add(HtmlToken.ATTRIBUTE_VALUE)
-                    tokens.add(builder.toString().trim())
-
-                    builder.clear()
-                }
-
-                ////////////////////////////////////////////////////////////////////////////////////
-
-                readingInnerTag and (ch == '<') and (charBefore != '\\') -> {
-                    // End of reading inner tag
-                    tokens.add(HtmlToken.TEXT_VALUE)
-                    tokens.add(builder.toString().trim())
-
-                    builder.clear()
-                }
-
-                ////////////////////////////////////////////////////////////////////////////////////
-
-                readingTagName and ((ch == ' ') or (ch == '>')) and (charBefore != '\\') -> {
-                    // End of reading tag name
-                    tokens.add(HtmlToken.TAG_NAME)
-                    tokens.add(builder.toString().trim())
-
-                    builder.clear()
-                }
-
-                ////////////////////////////////////////////////////////////////////////////////////
-
-                readingAttributeName and (ch == '=') and (charBefore != '\\') -> {
-                    // End of reading attribute name
-                    tokens.add(HtmlToken.ATTRIBUTE_NAME)
-                    tokens.add(builder.toString().trim())
-
-                    builder.clear()
-
-                    readingTagName = false
-                    afterTagName = true
-                    readingAttributeValue = true
-                }
-
-                readingAttributeName or readingTagName or readingInnerTag or readingAttributeValue
-                        and ch.isLetter() -> {
-                    builder.append(ch)
-                }
+            while (token != null) {
+                add(token)
+                token = nextToken()
             }
-
-            // Imma call this "Token checking"
-            when (ch) {
-                '<' -> {
-                    tokens.add(HtmlToken.OPEN_TAG)
-
-                    insideTag = true
-                    insideInnerTag = false
-                }
-
-                '>' -> {
-                    tokens.add(HtmlToken.CLOSE_TAG)
-
-                    insideTag = false
-                    insideInnerTag = true
-                    readingInnerTag = true
-                }
-
-                '/' -> {
-                    if (insideTag and !afterTagName) {
-                        // </..>
-                        tokens.add(HtmlToken.OPEN_CLOSING_TAG)
-
-                    } else if (insideTag and afterTagName) {
-                        // <.. />
-                        tokens.add(HtmlToken.NO_CHILD_CLOSE)
-                    }
-                }
-
-                else -> {
-                    if (ch.isLetter()
-
-                        and !readingTagName
-                        and !readingAttributeName
-                        and !readingInnerTag
-                        and !readingAttributeValue
-                    ) {
-                        if (insideTag and !afterTagName) {
-                            // <..
-                            builder.append(ch)
-
-                            readingTagName = true
-
-                        } else if (insideTag and afterTagName) {
-                            // <TagName ..
-                            builder.append(ch)
-
-                            readingAttributeName = true
-                        }
-                    }
-                }
-            }
-
-            charBefore = ch
         }
 
-        return tokens
+    private fun nextToken(): HtmlToken? {
+        when (currentChar) {
+            '<' -> {
+                if (nextChar == '/') return HtmlToken.TagClose
+                goBack()
+                return HtmlToken.TagOpen
+            }
+
+            '>' -> return HtmlToken.TagInsideClose
+
+            '/' -> {
+                if (nextChar == '>') return HtmlToken.TagCloseEarly
+                goBack()
+                TODO("Don't know what to do here")
+            }
+
+            '=' -> return HtmlToken.Equal
+            null -> return null
+            else -> return HtmlToken.Word(readWord())
+        }
     }
+
+    /**
+     * Reads the text until space or newline
+     */
+    private fun readWord(): String =
+        StringBuilder().apply {
+            while (nextChar.let { (it !in listOf(' ', '\n')) or (it != null) }) {
+                append(currentChar)
+            }
+
+            // go back when we got to the things
+            if (currentChar in listOf(' ', '\n')) goBack()
+        }.toString()
 }
