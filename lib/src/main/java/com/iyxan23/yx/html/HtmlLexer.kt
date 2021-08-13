@@ -25,11 +25,10 @@ class HtmlLexer(
 
     fun doLexicalAnalysis(): List<HtmlToken> =
         ArrayList<HtmlToken>().apply {
-            var token: HtmlToken? = nextToken()
+            var token: HtmlToken?
 
-            while (token != null) {
-                add(token)
-                token = nextToken()
+            while (nextToken().let { token = it; it != null }) {
+                add(token!!)
             }
         }
 
