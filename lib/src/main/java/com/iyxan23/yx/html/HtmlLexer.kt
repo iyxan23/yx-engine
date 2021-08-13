@@ -65,5 +65,7 @@ class HtmlLexer(
             while (nextChar.let { (it !in listOf(' ', '\n', '=', '>', '<', '/')) and (it != null) }) {
                 append(currentChar)
             }
+
+            if (currentChar in listOf('=', '>', '<', '/')) goBack()
         }.toString()
 }
