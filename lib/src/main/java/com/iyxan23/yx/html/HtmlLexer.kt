@@ -55,15 +55,12 @@ class HtmlLexer(
     }
 
     /**
-     * Reads the text until space or newline
+     * Reads the text until space, newline or other html tokens
      */
     private fun readWord(): String =
         StringBuilder().apply {
-            while (nextChar.let { (it !in listOf(' ', '\n')) or (it != null) }) {
+            while (nextChar.let { (it !in listOf(' ', '\n', '=', '>', '<', '/')) and (it != null) }) {
                 append(currentChar)
             }
-
-            // go back when we got to the things
-            if (currentChar in listOf(' ', '\n')) goBack()
         }.toString()
 }
