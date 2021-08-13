@@ -50,7 +50,10 @@ class HtmlLexer(
 
             '=' -> return HtmlToken.Equal
             null -> return null
-            else -> return HtmlToken.Word(readWord())
+            else -> {
+                goBack()
+                return HtmlToken.Word(readWord())
+            }
         }
     }
 
