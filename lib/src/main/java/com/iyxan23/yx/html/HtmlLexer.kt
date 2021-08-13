@@ -33,7 +33,7 @@ class HtmlLexer(
         }
 
     private fun nextToken(): HtmlToken? {
-        when (currentChar) {
+        when (nextChar) {
             '<' -> {
                 if (nextChar == '/') return HtmlToken.TagClose
                 goBack()
