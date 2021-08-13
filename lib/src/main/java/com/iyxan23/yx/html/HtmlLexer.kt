@@ -8,19 +8,18 @@ class HtmlLexer(
 ) {
     private var index = -1
     private var currentChar: Char? = null
-    private val indexInBound get() = index > 0 && index < text.length
 
     private val nextChar get() = advance()
 
     private fun advance(): Char? {
         index++
-        currentChar = if (indexInBound) text[index] else null
+        currentChar = text.getOrNull(index)
         return currentChar
     }
 
     private fun goBack(): Char? {
         index--
-        currentChar = if (indexInBound) text[index] else null
+        currentChar = text.getOrNull(index)
         return currentChar
     }
 
