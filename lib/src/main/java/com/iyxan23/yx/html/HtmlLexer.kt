@@ -23,38 +23,46 @@ class HtmlLexer(
         return currentChar
     }
 
-    fun doLexicalAnalysis(): List<HtmlToken> =
-        ArrayList<HtmlToken>().apply {
-            var token: HtmlToken?
+    fun doLexicalAnalysis(): List<HtmlToken> {
+        val result = ArrayList<HtmlToken>()
+        var token: HtmlToken?
 
-            while (nextToken().let { token = it; it != null }) {
-                add(token!!)
+        loop@ while (true) {
+            when (nextChar) {
+                '<' -> {
+                    token = if (nextChar == '/') {
+                        HtmlToken.TagClose
+                    } else {
+                        goBack()
+                        HtmlToken.TagOpen
+                    }
+                }
+
+                '>' -> token = HtmlToken.TagInsideClose
+
+                '/' -> {
+                    if (nextChar == '>') {
+                        token = HtmlToken.TagCloseEarly
+                    } else {
+                        goBack()
+                        TODO("Don't know what to do here")
+                    }
+                }
+
+                '=' -> token = HtmlToken.Equal
+                ' ', '\n' -> continue@loop
+                null -> token = null
+                else -> {
+                    goBack()
+                    token = HtmlToken.Word(readWord())
+                }
             }
+
+            if (token == null) break
+            result.add(token)
         }
 
-    private fun nextToken(): HtmlToken? {
-        when (nextChar) {
-            '<' -> {
-                if (nextChar == '/') return HtmlToken.TagClose
-                goBack()
-                return HtmlToken.TagOpen
-            }
-
-            '>' -> return HtmlToken.TagInsideClose
-
-            '/' -> {
-                if (nextChar == '>') return HtmlToken.TagCloseEarly
-                goBack()
-                TODO("Don't know what to do here")
-            }
-
-            '=' -> return HtmlToken.Equal
-            null -> return null
-            else -> {
-                goBack()
-                return HtmlToken.Word(readWord())
-            }
-        }
+        return result
     }
 
     /**
