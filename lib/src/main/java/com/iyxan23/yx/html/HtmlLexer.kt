@@ -7,7 +7,7 @@ import com.iyxan23.yx.BaseParser
  */
 class HtmlLexer(
     text: String
-): BaseParser<Char, String>(text) {
+): BaseParser<String, Char>(text) {
 
     override fun getItem(value: String, index: Int): Char? = value.getOrNull(index)
 

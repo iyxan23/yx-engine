@@ -1,11 +1,12 @@
 package com.iyxan23.yx
 
-abstract class BaseParser<ItemType, ValueType>(
+abstract class BaseParser<ValueType, ItemType>(
     private val items: ValueType
 ) {
     protected var index = -1
     protected var currentItem: ItemType? = null
     protected val nextItem get() = advance()
+    protected val previousItem get() = getItem(items, index - 1)
 
     protected fun advance(): ItemType? {
         index++
