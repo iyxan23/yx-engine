@@ -28,9 +28,9 @@ class HtmlLexer(
         var token: HtmlToken?
 
         loop@ while (true) {
-            when (nextChar) {
+            token = when (nextChar) {
                 '<' -> {
-                    token = if (nextChar == '/') {
+                    if (nextChar == '/') {
                         HtmlToken.TagClose
                     } else {
                         goBack()
@@ -38,27 +38,29 @@ class HtmlLexer(
                     }
                 }
 
-                '>' -> token = HtmlToken.TagInsideClose
+                '>' -> HtmlToken.TagInsideClose
 
                 '/' -> {
                     if (nextChar == '>') {
-                        token = HtmlToken.TagCloseEarly
+                        HtmlToken.TagCloseEarly
                     } else {
                         goBack()
-                        TODO("Don't know what to do here")
+                        // there is no reason to parse this, just read it as a word
+                        HtmlToken.Word(readWord())
                     }
                 }
 
-                '=' -> token = HtmlToken.Equal
+                '=' -> HtmlToken.Equal
+
                 ' ', '\n' -> continue@loop
-                null -> token = null
+                null -> break@loop
+
                 else -> {
                     goBack()
-                    token = HtmlToken.Word(readWord())
+                    HtmlToken.Word(readWord())
                 }
             }
 
-            if (token == null) break
             result.add(token)
         }
 
