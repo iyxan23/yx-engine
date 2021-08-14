@@ -145,23 +145,32 @@ class HtmlParser(
                 attributes.add(HtmlAttribute(attributeName, attributeValue))
             }
 
-            // we're done parsing the attributes, let's parse it's inner text!
+            // we're done parsing the attributes, let's parse it's inner!
             var innerText = ""
+            val children = ArrayList<HtmlElement>()
 
             // loop until the next item is a tag close
             while (nextItem != HtmlToken.TagClose) {
-                if (currentItem is HtmlToken.Word) {
+                if (currentItem == HtmlToken.TagOpen) {
+                    parseHtmlTag()?.let { children.add(it) }
+
+                } else if (currentItem is HtmlToken.Word) {
                     innerText += " ${(currentItem as HtmlToken.Word).word}"
+
                 } else {
-                    // TODO: 8/14/21 parse children html
-                    Log.w(TAG, "parseHtmlTag: parsing children html is unimplemented")
+                    Log.w(TAG, "parseHtmlTag: Unknown token $currentItem, skipping")
+                    continue
                 }
             }
+
+            // after the close, we need to skip until the last close inside token
+            // < ... ">"
+            while (true) if (nextItem == HtmlToken.TagInsideClose) break
 
             // remove the first space
             if (innerText.length > 1) innerText = innerText.drop(1)
 
-            return HtmlElement(tagName, innerText, attributes, emptyList())
+            return HtmlElement(tagName, innerText, attributes, children)
         }
     }
 }
