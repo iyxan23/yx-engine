@@ -158,6 +158,9 @@ class HtmlParser(
                 }
             }
 
+            // remove the first space
+            if (innerText.length > 1) innerText = innerText.drop(1)
+
             return HtmlElement(tagName, innerText, attributes, emptyList())
         }
     }
