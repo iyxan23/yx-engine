@@ -59,6 +59,7 @@ class HtmlParser(
                     parseHtmlTag()?.let { result.add(it) }
                 } else {
                     Log.w(TAG, "parse: $index is not a tag opening, skipping")
+                    continue
                 }
             }
 
@@ -80,6 +81,11 @@ class HtmlParser(
             while (nextItem != HtmlToken.TagInsideClose) {
                 // check if this is a word
                 if (currentItem !is HtmlToken.Word) {
+                    // ok, check if this is a tag close early then
+                    if (currentItem is HtmlToken.TagCloseEarly)
+                        // hmm it is, let's return directly
+                        return HtmlElement(tagName, "", attributes, emptyList())
+
                     Log.w(TAG, "parseHtmlTag: got $currentItem inside a tag, skipping this")
                     continue
                 }
