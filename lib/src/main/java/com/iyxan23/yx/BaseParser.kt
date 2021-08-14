@@ -8,6 +8,9 @@ abstract class BaseParser<ValueType, ItemType>(
     protected val nextItem get() = advance()
     protected val previousItem get() = getItem(items, index - 1)
 
+    protected val peekNext get() = getItem(items, index + 1)
+    protected val peekPrevious get() = getItem(items, index - 1)
+
     protected fun advance(): ItemType? {
         index++
         currentItem = getItem(items, index)
