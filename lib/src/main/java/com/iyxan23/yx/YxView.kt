@@ -8,6 +8,7 @@ import android.view.View
 import com.iyxan23.yx.html.HtmlElement
 import com.iyxan23.yx.html.HtmlLexer
 import com.iyxan23.yx.html.HtmlParser
+import com.iyxan23.yx.net.Net
 import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock

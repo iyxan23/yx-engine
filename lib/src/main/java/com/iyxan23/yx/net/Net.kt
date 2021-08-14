@@ -1,4 +1,4 @@
-package com.iyxan23.yx
+package com.iyxan23.yx.net
 
 import java.io.ByteArrayOutputStream
 import java.io.IOException
