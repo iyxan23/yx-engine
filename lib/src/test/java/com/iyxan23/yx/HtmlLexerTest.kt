@@ -3,9 +3,20 @@ package com.iyxan23.yx
 import com.iyxan23.yx.html.HtmlLexer
 import com.iyxan23.yx.html.HtmlToken
 import org.junit.Test
-import kotlin.math.exp
 
 class HtmlLexerTest {
+
+    private fun <T> assertList(result: List<T>, expectation: List<T>) {
+        result.forEachIndexed { index, item ->
+            assert(expectation[index] == item) {
+                println("Expected ${expectation[index]} at index $index, got $item")
+                println("\nDifferences:")
+                println("Expectation: $expectation")
+                println("Result:      $result")
+            }
+        }
+    }
+
     @Test
     fun `Test - Simple HTML`() {
         val html = """
@@ -30,13 +41,6 @@ class HtmlLexerTest {
             HtmlToken.TagCloseEarly
         )
 
-        result.forEachIndexed { index, htmlToken ->
-            assert(expectation[index] == htmlToken) {
-                println("Expected ${expectation[index]} at index $index, got $htmlToken")
-                println()
-                println(result)
-                println(expectation)
-            }
-        }
+        assertList(result, expectation)
     }
 }
