@@ -1,36 +1,24 @@
 package com.iyxan23.yx.html
 
+import com.iyxan23.yx.BaseParser
+
 /**
  * This lexer turns a html text into a list of tokens that will later be parsed by the parser
  */
 class HtmlLexer(
-    private val text: String
-) {
-    private var index = -1
-    private var currentChar: Char? = null
+    text: String
+): BaseParser<Char, String>(text) {
 
-    private val nextChar get() = advance()
-
-    private fun advance(): Char? {
-        index++
-        currentChar = text.getOrNull(index)
-        return currentChar
-    }
-
-    private fun goBack(): Char? {
-        index--
-        currentChar = text.getOrNull(index)
-        return currentChar
-    }
+    override fun getItem(value: String, index: Int): Char? = value.getOrNull(index)
 
     fun doLexicalAnalysis(): List<HtmlToken> {
         val result = ArrayList<HtmlToken>()
         var token: HtmlToken?
 
         loop@ while (true) {
-            token = when (nextChar) {
+            token = when (nextItem) {
                 '<' -> {
-                    if (nextChar == '/') {
+                    if (nextItem == '/') {
                         HtmlToken.TagClose
                     } else {
                         goBack()
@@ -41,7 +29,7 @@ class HtmlLexer(
                 '>' -> HtmlToken.TagInsideClose
 
                 '/' -> {
-                    if (nextChar == '>') {
+                    if (nextItem == '>') {
                         HtmlToken.TagCloseEarly
                     } else {
                         goBack()
@@ -72,10 +60,10 @@ class HtmlLexer(
      */
     private fun readWord(): String =
         StringBuilder().apply {
-            while (nextChar.let { (it !in listOf(' ', '\n', '=', '>', '<', '/')) and (it != null) }) {
-                append(currentChar)
+            while (nextItem.let { (it !in listOf(' ', '\n', '=', '>', '<', '/')) and (it != null) }) {
+                append(currentItem)
             }
 
-            if (currentChar in listOf('=', '>', '<', '/')) goBack()
+            if (currentItem in listOf('=', '>', '<', '/')) goBack()
         }.toString()
 }
