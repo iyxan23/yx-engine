@@ -112,6 +112,10 @@ class HtmlParser(
                 // because the Lexer can only parse the word, if this is a string, we need to parse it
                 if (attributeValue.startsWith('"')) {
                     // FIXME: 8/14/21 the value of a string can contain one of the html token!!
+
+                    // drop the " at the start
+                    attributeValue = attributeValue.drop(1)
+
                     // ok we need to read this string
                     while (peekNext is HtmlToken.Word) {
                         advance()
