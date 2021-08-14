@@ -1,10 +1,9 @@
 package com.iyxan23.yx.html
 
 class HtmlParser(
-    private var htmlText: String
+    private val tokens: List<HtmlToken>
 ) {
-    fun parse(): List<HtmlElement> {
-        val tokens = HtmlLexer(htmlText).doLexicalAnalysis()
+    fun parse(): HtmlElement {
         TODO()
     }
 }
