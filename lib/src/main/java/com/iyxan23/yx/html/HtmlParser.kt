@@ -149,6 +149,9 @@ class HtmlParser(
             var innerText = ""
             val children = ArrayList<HtmlElement>()
 
+            // TODO: 8/15/21 Mix children and innerText together because we can't know if a tag is
+            //               inside the innerText
+
             // loop until the next item is a tag close
             while (nextItem != HtmlToken.TagClose) {
                 if (currentItem == HtmlToken.TagOpen) {
