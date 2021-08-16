@@ -2,6 +2,7 @@ package com.iyxan23.yx.html
 
 import android.util.Log
 import com.iyxan23.yx.BaseParser
+import com.iyxan23.yx.Either
 
 /**
  * This class parses a list of html tokens into a single HTML element that will be the html tag
@@ -76,6 +77,42 @@ class HtmlParser(
             val tagName = (currentItem as HtmlToken.Word).word
 
             // now let's parse it's attributes
+            val attrsOrHtml = parseAttributes(tagName)
+            val attributes: List<HtmlAttribute>
+
+            when (attrsOrHtml) {
+                is Either.Left<ArrayList<HtmlAttribute>> -> {
+                    // this is an arraylist of attributes, means that the attributes parser is
+                    // doing its thing
+                    attributes = attrsOrHtml.value
+                }
+
+                is Either.Right<HtmlElement> -> {
+                    // this is a html element, means that the attributes parser encountered a
+                    // close early tag, which means it doesn't have any inner, so we return
+                    // directly
+                    return attrsOrHtml.value
+                }
+            }
+
+            // we're done parsing the attributes, let's parse it's inner!
+            val inner = parseInner()
+
+            // after the close, we need to skip until the last close inside token
+            // < ... ">"
+            while (true) if (nextItem == HtmlToken.TagInsideClose) break
+
+            return HtmlElement(tagName, inner, attributes)
+        }
+
+        /**
+         * Parses an attribute of an html tag, this parse function should be called after the tag
+         * name. This function returns either the attributes or the html element. Might sound odd
+         * for a function that parses an attribute to return an html element, it does that when
+         * it encountered a close early token `/>` where an html element doesn't have any inner.
+         * So, to save some time, the [parse] function will just return the html element directly
+         */
+        private fun parseAttributes(tagName: String): Either<ArrayList<HtmlAttribute>, HtmlElement> {
             val attributes = ArrayList<HtmlAttribute>()
 
             while (nextItem != HtmlToken.TagInsideClose) {
@@ -84,7 +121,7 @@ class HtmlParser(
                     // ok, check if this is a tag close early then
                     if (currentItem is HtmlToken.TagCloseEarly)
                         // hmm it is, let's return directly
-                        return HtmlElement(tagName, emptyList(), attributes)
+                        return Either.Right(HtmlElement(tagName, emptyList(), attributes))
 
                     Log.w(TAG, "parseHtmlTag: got $currentItem inside a tag, skipping this")
                     continue
@@ -145,7 +182,13 @@ class HtmlParser(
                 attributes.add(HtmlAttribute(attributeName, attributeValue))
             }
 
-            // we're done parsing the attributes, let's parse it's inner!
+            return Either.Left(attributes)
+        }
+
+        /**
+         * All this function does is to parse an inner of an HTML tag
+         */
+        private fun parseInner(): List<HtmlElementInner> {
             val inner = ArrayList<HtmlElementInner>()
 
             // loop until the next item is a tag close
@@ -180,11 +223,7 @@ class HtmlParser(
                 }
             }
 
-            // after the close, we need to skip until the last close inside token
-            // < ... ">"
-            while (true) if (nextItem == HtmlToken.TagInsideClose) break
-
-            return HtmlElement(tagName, inner, attributes)
+            return inner
         }
     }
 }
