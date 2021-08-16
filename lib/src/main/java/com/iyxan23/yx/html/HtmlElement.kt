@@ -2,16 +2,12 @@ package com.iyxan23.yx.html
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Matrix
 
 open class HtmlElement(
     val tag: String,
-    val innerText: String,
-    val attributes: List<HtmlAttribute>,
-    val children: List<HtmlElement>
+    val inner: List<HtmlElementInner>,
+    val attributes: List<HtmlAttribute>
 ) {
-    val childrenSizes = HashMap<HtmlElement, Size>()
-
     /**
      * Measures the size of the current HTML element
      *
@@ -24,21 +20,7 @@ open class HtmlElement(
         // also, since all html element can have children, every html elements must measure them
         val size = Size(0, 0)
 
-        for (child in children) {
-            val childSize = child.measure(min, max)
-            childrenSizes[child] = childSize
-
-            val sumHeight = size.height + childSize.height
-
-            if (sumHeight >= max.height)
-                size.height = sumHeight
-
-            // get the largest width
-            if (childSize.width > size.width && childSize.width <= max.width)
-                size.width = childSize.width
-        }
-
-        return size
+        TODO("Measure text and elements")
     }
 
     /**
@@ -50,15 +32,30 @@ open class HtmlElement(
         val ourBitmap = Bitmap.createBitmap(canvas.width, canvas.height, Bitmap.Config.ARGB_8888)
 
         var xPos = 0
-        for (child in children) {
-            // create a bitmap for the child to draw on
-            val size = childrenSizes[child]!!
-            val childBitmap = Bitmap.createBitmap(ourBitmap, xPos, 0, size.width, size.height)
-            child.draw(Canvas(childBitmap))
+        TODO("Draw text and elements")
 
-            xPos += size.height
-        }
-
-        canvas.drawBitmap(ourBitmap, Matrix(), null)
+//        canvas.drawBitmap(ourBitmap, Matrix(), null)
     }
+}
+
+/**
+ * This class is used to represent the inner content of an html tag.
+ *
+ * Example:
+ *
+ * Input:
+ * > `<p>Hello <b>World!</b></p>`
+ *
+ * Inner content of the P tag:
+ * > ```[```
+ *
+ * > ```TagInnerContent.Text(text="Hello "),```
+ *
+ * > ```TagInnerContent.Element(tag="b" ... inner=[Text(text="World!")])```
+ *
+ * > ```]```
+ */
+sealed class HtmlElementInner {
+    data class Text(var text: String) : HtmlElementInner()
+    data class Element(val tag: HtmlElement) : HtmlElementInner()
 }

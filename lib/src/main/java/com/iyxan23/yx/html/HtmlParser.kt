@@ -84,7 +84,7 @@ class HtmlParser(
                     // ok, check if this is a tag close early then
                     if (currentItem is HtmlToken.TagCloseEarly)
                         // hmm it is, let's return directly
-                        return HtmlElement(tagName, "", attributes, emptyList())
+                        return HtmlElement(tagName, emptyList(), attributes)
 
                     Log.w(TAG, "parseHtmlTag: got $currentItem inside a tag, skipping this")
                     continue
@@ -146,19 +146,33 @@ class HtmlParser(
             }
 
             // we're done parsing the attributes, let's parse it's inner!
-            var innerText = ""
-            val children = ArrayList<HtmlElement>()
-
-            // TODO: 8/15/21 Mix children and innerText together because we can't know if a tag is
-            //               inside the innerText
+            val inner = ArrayList<HtmlElementInner>()
 
             // loop until the next item is a tag close
             while (nextItem != HtmlToken.TagClose) {
                 if (currentItem == HtmlToken.TagOpen) {
-                    parseHtmlTag()?.let { children.add(it) }
+                    // this is an element opening, parse it and add it as an element
+                    parseHtmlTag()?.let {
+                        inner.add(HtmlElementInner.Element(it))
+                    }
 
                 } else if (currentItem is HtmlToken.Word) {
-                    innerText += " ${(currentItem as HtmlToken.Word).word}"
+                    // get the first item
+                    val firstItem = inner.firstOrNull()
+
+                    // if there is the first item and it's a text
+                    if (firstItem != null && firstItem is HtmlElementInner.Text) {
+                        // add the word
+                        firstItem.text += " ${(currentItem as HtmlToken.Word).word}"
+
+                    } else {
+                        // if not, then create it
+                        inner.add(
+                            HtmlElementInner.Text(
+                                (currentItem as HtmlToken.Word).word
+                            )
+                        )
+                    }
 
                 } else {
                     Log.w(TAG, "parseHtmlTag: Unknown token $currentItem, skipping")
@@ -170,10 +184,7 @@ class HtmlParser(
             // < ... ">"
             while (true) if (nextItem == HtmlToken.TagInsideClose) break
 
-            // remove the first space
-            if (innerText.length > 1) innerText = innerText.drop(1)
-
-            return HtmlElement(tagName, innerText, attributes, children)
+            return HtmlElement(tagName, inner, attributes)
         }
     }
 }
