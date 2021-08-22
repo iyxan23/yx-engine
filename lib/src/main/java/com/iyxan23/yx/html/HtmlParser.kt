@@ -117,7 +117,7 @@ class HtmlParser(
 
         // create head or body if they doesn't exists
         if (headElement == null) headElement = HtmlElement("head")
-        if (bodyElement == null) bodyElement = HtmlElement("head")
+        if (bodyElement == null) bodyElement = HtmlElement("body")
 
         // put the inner vars into their element
 //        headElement.inner.addAll(headInner)
