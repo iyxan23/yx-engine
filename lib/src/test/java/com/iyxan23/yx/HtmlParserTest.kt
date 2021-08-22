@@ -5,7 +5,7 @@ import org.junit.Test
 
 class HtmlParserTest {
     @Test
-    fun `Test - Simple HTML`() {
+    fun `Test plain parser - Simple HTML`() {
         val html = """
             <text attributeName=attributeValue stringAttribute="hello world">
             hello world!
@@ -33,7 +33,7 @@ class HtmlParserTest {
     }
 
     @Test
-    fun `Test - Close Early Tag`() {
+    fun `Test plain parser - Close Early Tag`() {
         val html = """
             <text/>
         """.trimIndent()
@@ -54,7 +54,7 @@ class HtmlParserTest {
     }
 
     @Test
-    fun `Test - Nested HTML`() {
+    fun `Test plain parser - Nested HTML`() {
         val html = """
             <a>
             <b>
@@ -79,6 +79,68 @@ class HtmlParserTest {
             println("Parsed elements doesn't match the expectation\n")
             println("Expectation: $expectation")
             println("Elements:    $elements")
+        }
+    }
+
+    @Test
+    fun `Test structure fixer & parser - Simple HTML`() {
+        val html = """
+            <p>hello world!</p>
+        """.trimIndent()
+
+        // lex then parse using the regular HtmlParser
+        val tokens = HtmlLexer(html).doLexicalAnalysis()
+        val rootElement = HtmlParser(tokens).parse()
+
+        val expectation =
+            HtmlElement("html", inner = arrayListOf(
+                HtmlElementInner.Element(HtmlElement("head")),
+                HtmlElementInner.Element(HtmlElement("body", inner = arrayListOf(
+                    HtmlElementInner.Element(HtmlElement("p", inner = arrayListOf(
+                        HtmlElementInner.Text("hello world!")
+                    )))
+                )))
+            ))
+
+        assert(rootElement == expectation) {
+            println("Parsed elements doesn't match the expectation\n")
+            println("Expectation: $expectation")
+            println("Elements:    $rootElement")
+        }
+    }
+
+    @Test
+    fun `Test structure fixer & parser - Double html tag`() {
+        // these flags and the inner must be combined together
+        val html = """
+            <html flag1>
+                1
+            </html>
+            <html flag2>
+                2
+            </html>
+        """.trimIndent()
+
+        // lex then parse using the regular HtmlParser
+        val tokens = HtmlLexer(html).doLexicalAnalysis()
+        val rootElement = HtmlParser(tokens).parse()
+
+        val expectation =
+            HtmlElement("html", attributes = arrayListOf(
+                HtmlAttribute("flag1"),
+                HtmlAttribute("flag2")
+            ), inner = arrayListOf(
+                HtmlElementInner.Element(HtmlElement("head")),
+                HtmlElementInner.Element(HtmlElement("body", inner = arrayListOf(
+                    HtmlElementInner.Text("1"),
+                    HtmlElementInner.Text("2")
+                )))
+            ))
+
+        assert(rootElement == expectation) {
+            println("Parsed elements doesn't match the expectation\n")
+            println("Expectation: $expectation")
+            println("Elements:    $rootElement")
         }
     }
 }
