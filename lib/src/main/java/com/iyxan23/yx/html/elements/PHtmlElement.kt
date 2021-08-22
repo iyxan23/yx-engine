@@ -10,8 +10,8 @@ import com.iyxan23.yx.sp
 
 class PHtmlElement(
     tag: String,
-    inner: List<HtmlElementInner>,
-    attributes: List<HtmlAttribute>
+    inner: ArrayList<HtmlElementInner>,
+    attributes: ArrayList<HtmlAttribute>
 ) : HtmlElement(tag, inner, attributes) {
 
     // current temporary preference is that the text's size will be 16sp

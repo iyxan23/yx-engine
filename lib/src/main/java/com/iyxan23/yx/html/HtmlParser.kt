@@ -190,7 +190,7 @@ class HtmlParser(
             // < ... ">"
             while (true) if (nextItem == HtmlToken.TagInsideClose) break
 
-            return HtmlElement(tagName, inner, attributes)
+            return HtmlElement(tagName, ArrayList(inner), attributes)
         }
 
         /**
@@ -209,7 +209,7 @@ class HtmlParser(
                     // ok, check if this is a tag close early then
                     if (currentItem is HtmlToken.TagCloseEarly)
                         // hmm it is, let's return directly
-                        return Either.Right(HtmlElement(tagName, emptyList(), attributes))
+                        return Either.Right(HtmlElement(tagName, ArrayList(), attributes))
 
                     Log.w(TAG, "parseHtmlTag: got $currentItem inside a tag, skipping this")
                     continue

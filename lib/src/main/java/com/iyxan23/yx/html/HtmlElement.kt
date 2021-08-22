@@ -43,8 +43,8 @@ open class HtmlElement(
      */
     open fun copy(
         tag: String = this.tag,
-        inner: List<HtmlElementInner> = this.inner,
-        attributes: List<HtmlAttribute> = this.attributes
+        inner: ArrayList<HtmlElementInner> = this.inner,
+        attributes: ArrayList<HtmlAttribute> = this.attributes
     ): HtmlElement {
         return HtmlElement(tag, inner, attributes)
     }
