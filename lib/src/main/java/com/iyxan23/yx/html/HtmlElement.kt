@@ -48,6 +48,31 @@ open class HtmlElement(
     ): HtmlElement {
         return HtmlElement(tag, inner, attributes)
     }
+
+    // stuff that needs to be overridden because this is not a data class:
+    override fun toString(): String {
+        return "HtmlElement(tag='$tag', inner=$inner, attributes=$attributes)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as HtmlElement
+
+        if (tag != other.tag) return false
+        if (inner != other.inner) return false
+        if (attributes != other.attributes) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = tag.hashCode()
+        result = 31 * result + inner.hashCode()
+        result = 31 * result + attributes.hashCode()
+        return result
+    }
 }
 
 /**

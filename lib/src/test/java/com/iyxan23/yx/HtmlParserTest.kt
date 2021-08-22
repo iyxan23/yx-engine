@@ -1,9 +1,6 @@
 package com.iyxan23.yx
 
-import com.iyxan23.yx.html.HtmlAttribute
-import com.iyxan23.yx.html.HtmlElement
-import com.iyxan23.yx.html.HtmlLexer
-import com.iyxan23.yx.html.HtmlParser
+import com.iyxan23.yx.html.*
 import org.junit.Test
 
 class HtmlParserTest {
@@ -20,10 +17,12 @@ class HtmlParserTest {
         val elements = HtmlParser.HtmlParserImpl(tokens).parse()
 
         val expectation = listOf(
-            HtmlElement("text", "hello world!", listOf(
+            HtmlElement("text", arrayListOf(
+                HtmlElementInner.Text("hello world!")
+            ), arrayListOf(
                 HtmlAttribute("attributeName", "attributeValue"),
                 HtmlAttribute("stringAttribute", "hello world")
-            ), emptyList())
+            ))
         )
 
         assert(elements == expectation) {
@@ -44,7 +43,7 @@ class HtmlParserTest {
         val elements = HtmlParser.HtmlParserImpl(tokens).parse()
 
         val expectation = listOf(
-            HtmlElement("text", "", emptyList(), emptyList())
+            HtmlElement("text")
         )
 
         assert(elements == expectation) {
@@ -69,10 +68,10 @@ class HtmlParserTest {
         val elements = HtmlParser.HtmlParserImpl(tokens).parse()
 
         val expectation = listOf(
-            HtmlElement("a", "", emptyList(), listOf(
-                HtmlElement("b", "", emptyList(), listOf(
-                    HtmlElement("c", "", emptyList(), emptyList())
-                ))
+            HtmlElement("a", inner = arrayListOf(
+                HtmlElementInner.Element(HtmlElement("b", inner = arrayListOf(
+                    HtmlElementInner.Element(HtmlElement("c"))
+                )))
             ))
         )
 
