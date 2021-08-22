@@ -5,8 +5,8 @@ import android.graphics.Canvas
 
 open class HtmlElement(
     val tag: String,
-    val inner: List<HtmlElementInner>,
-    val attributes: List<HtmlAttribute>
+    val inner: ArrayList<HtmlElementInner> = ArrayList(),
+    val attributes: ArrayList<HtmlAttribute> = ArrayList()
 ) {
     /**
      * Measures the size of the current HTML element
@@ -35,6 +35,18 @@ open class HtmlElement(
         TODO("Draw text and elements")
 
 //        canvas.drawBitmap(ourBitmap, Matrix(), null)
+    }
+
+    /**
+     * This function will be used to copy the current HtmlElement and will have optional parameters
+     * of the content of the HtmlElement to be modified / changed
+     */
+    open fun copy(
+        tag: String = this.tag,
+        inner: List<HtmlElementInner> = this.inner,
+        attributes: List<HtmlAttribute> = this.attributes
+    ): HtmlElement {
+        return HtmlElement(tag, inner, attributes)
     }
 }
 

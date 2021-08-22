@@ -40,7 +40,95 @@ class HtmlParser(
      * forget about the head and body tag needed)
      */
     private fun fixStructure(elements: List<HtmlElement>): HtmlElement {
-        TODO("Not yet implemented")
+        // First, we will loop through the elements and try to get the html, head, body elements
+        // and put it into these vars:
+        var htmlElement: HtmlElement? = null
+        var headElement: HtmlElement? = null
+        var bodyElement: HtmlElement? = null
+
+        // If we found other elements that aren't apart of the html / the root, we will need to
+        // put them to either the body or the head in these arraylists, these children will get
+        // added to the head / body element at the end
+
+//        val headInner = ArrayList<HtmlElementInner>() // currently not needed YET
+        val bodyInner = ArrayList<HtmlElementInner>()
+
+        for (element in elements) {
+            when (element.tag) {
+                "html" -> {
+                    htmlElement = htmlElement?.let {
+                        // well this is awkward, there are multiple html tags..
+                        Log.w(TAG, "fixStructure: multiple html tags!")
+
+                        // for this situation, we're just going to mix them both
+                        it.inner.addAll(element.inner)
+                        it.attributes.addAll(element.attributes)
+
+                        it
+                    } ?: element /* alright, set this to htmlElement then */
+                }
+
+                "head" -> {
+                    headElement = headElement?.let {
+                        // well this is awkward, there are multiple head tags..
+                        Log.w(TAG, "fixStructure: multiple head tags!")
+
+                        // for this situation, we're just going to mix them both
+                        it.inner.addAll(element.inner)
+                        it.attributes.addAll(element.attributes)
+
+                        it
+                    } ?: element /* alright, set this to headElement then */
+                }
+
+                "body" -> {
+                    bodyElement = bodyElement?.let {
+                        // well this is awkward, there are multiple body tags..
+                        Log.w(TAG, "fixStructure: multiple body tags!")
+
+                        // for this situation, we're just going to mix them both
+                        it.inner.addAll(element.inner)
+                        it.attributes.addAll(element.attributes)
+
+                        it
+                    } ?: element /* alright, set this to bodyElement then */
+                }
+
+                else -> {
+                    // random tag outta nowhere! put it on body!
+                    // TODO: 8/22/21 move tags like script, link, title, etc to headChildren instead
+                    bodyInner.add(HtmlElementInner.Element(element))
+                }
+            }
+        }
+
+        // create a html tag if it doesn't exists
+        if (htmlElement == null) htmlElement = HtmlElement("html")
+
+        // also move inner of html into body, since html can only contain the head and body tags
+        if (htmlElement.inner.isNotEmpty()) {
+            htmlElement.inner.mapNotNull {
+                bodyInner.add(it)
+                null
+            }
+
+            htmlElement.inner.clear()
+        }
+
+        // create head or body if they doesn't exists
+        if (headElement == null) headElement = HtmlElement("head")
+        if (bodyElement == null) bodyElement = HtmlElement("head")
+
+        // put the inner vars into their element
+//        headElement.inner.addAll(headInner)
+        bodyElement.inner.addAll(bodyInner)
+
+        // then add the head and the body into the html tag
+        htmlElement.inner.add(HtmlElementInner.Element(headElement))
+        htmlElement.inner.add(HtmlElementInner.Element(bodyElement))
+
+        // done
+        return htmlElement
     }
 
     /**
